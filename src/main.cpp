@@ -1,3 +1,4 @@
+#define _GLIBCXX_USE_CXX11_ABI 0
 #include "Globals.hpp"
 #include "View.hpp"
 #include "World.hpp"
@@ -6,7 +7,6 @@
 #include "core/Scene.hpp"
 #include <algorithm>
 using namespace std;
-
 //****************************************************
 // Global Variables
 //****************************************************
@@ -34,6 +34,10 @@ getShadedColor(Primitive const & primitive, Vec3 const & pos, Ray const & ray)
   {
     return RGB(0,0,0);
   }
+  //   if (m.getMT() == 2 && m.getMR() == 0)
+  // {
+  //   return RGB(20,20,20);
+  // }
   RGB C = primitive.getColor();
   RGB a = ((m.getMA())*(C))*(world->getAmbientLightColor());
   RGB S = (m.getMSM())*C + (1.0 - m.getMSM())*RGB(1.0,1.0,1.0);
@@ -46,7 +50,6 @@ getShadedColor(Primitive const & primitive, Vec3 const & pos, Ray const & ray)
 
     Ray rsh = (*i)->getShadowRay(pos - 0.001*ur,isPoint);
     Primitive* nm;
-    // Ray lsh = Ray::fromOriginAndDirection(rsh.start(),-1 * rsh.direction());
     if (isPoint)
     {
       if ((nm = world->intersect(rsh)) != NULL)
@@ -70,37 +73,6 @@ getShadedColor(Primitive const & primitive, Vec3 const & pos, Ray const & ray)
       }
 
     }
-
-    // if (isPoint)
-    // {
-    //   Primitive* p = world->intersect(lsh);
-    //   if (p != NULL && ((p->getMaterial()).getMT() != 0))
-    //   {
-    //     m = p -> getMaterial();
-    //     double n2 = m.getMTN();
-    //     double mt = m.getMT();
-    //     Vec3 nr = p->calculateNormal(lsh.getPos(lsh.minT()));
-    //     Vec3 ur = lsh.direction();
-    //     double ct1 = -1*(ur*nr);
-    //     double ss2 = (1-(ct1*ct1))/(n2*n2);
-    //     Vec3 rfd = ur/n2 + ((ct1/n2)-sqrt(1-ss2))*nr;
-    //     rfd = rfd/rfd.length();
-    //     Ray rf = Ray::fromOriginAndDirection(lsh.getPos(lsh.minT())+0.001*rfd,rfd);
-    //     p -> intersect(rf);
-    //     n2 = 1/n2;
-    //     nr = p->calculateNormal(rf.getPos(rf.minT()));
-    //     nr = -1 * nr;
-    //     ur = rf.direction();
-    //     ct1 = -1*(ur*nr);
-    //     ss2 = (1-(ct1*ct1))/(n2*n2);
-    //     rfd = ur/n2 + ((ct1/n2)-sqrt(1-ss2))*nr;
-    //     rfd = rfd/rfd.length();
-    //     rf = Ray::fromOriginAndDirection(rf.getPos(rf.minT())+0.001*rfd,rfd);
-
-    //   }
-
-    // }
-
 
     ur = -1*ur;
     Vec3 nr = primitive.calculateNormal(pos);
@@ -138,6 +110,7 @@ getShadedColor(Primitive const & primitive, Vec3 const & pos, Ray const & ray)
 RGB
 traceRay(Ray & ray, int depth, int presentMaterial, int of)
 {
+  // std::cout << ray.start() << " " << depth << std::endl;
   if (depth > max_trace_depth)
     return RGB(0, 0, 0);
   std::vector<Primitive *>::const_iterator i = world->primitivesBegin();
@@ -319,7 +292,7 @@ reverseTraceRay(Ray & ray, int depth, int presentMaterial, int of, Vec3 &positio
 }
 // Main rendering loop.
 void
-renderWithRaytracing()
+renderWithRaytracing(int focus)
 {
   Sample sample;   // Point on the view being sampled.
   Ray ray;         // Ray being traced from the eye through the point.
@@ -327,66 +300,59 @@ renderWithRaytracing()
 
   int const rpp = view->raysPerPixel();
   // int const rpp = 10;
-  double r = 10;
-  double d = 5;
-  double w = 0.2;
-  double rp = sqrt((r*r) - ((r - w/2)*(r - w/2)));
+  // double r = 2;
+  // double d = 0.5;
+  // double w = 0.2;
+  // double rp = sqrt((r*r) - ((r - w/2)*(r - w/2)));
+  double rp = 2.0;
+  double d = 11.2;
   for (int yi = 0; yi < view->height(); ++yi)
   {
-    for (int xi = 0; xi < view->width(); ++xi)
+    for (int xi =0; xi < view->width(); ++xi)
     {
       c = RGB(0, 0, 0);
-      for (int ri = 0; ri < rpp; ++ri)
+      if (focus)
       {
-        view->getSample(xi, yi, ri, sample);
-        for (int xp = -1*rp; xp < rp; ++xp)
+        view->getSample(xi, yi, 0, sample);
+        int count = 0;
+        for (double xp = -1*rp; xp < rp; xp = xp + 0.1)
         {
-          for (int yp = -1*sqrt(rp*rp - (xp*xp)); yp < sqrt(rp*rp - (xp*xp)); ++yp)
+          for (double yp = -1*sqrt(rp*rp - (xp*xp)); yp < sqrt(rp*rp - (xp*xp)); yp = yp + 0.1)
           {
+            // double yp = -1*sqrt(rp*rp - (xp*xp))+0.1;
             ray = view -> createViewingRay2(sample, xp, yp, d);
             ray.transform(viewToWorld);            // transform this to world space
             c += traceRay(ray, 0, 0, 0);
+            count++;
+            // yp = sqrt(rp*rp - (xp*xp)) - 0.1;
+            // ray = view -> createViewingRay2(sample, xp, yp, d);
+            // ray.transform(viewToWorld);            // transform this to world space
+            // c += traceRay(ray, 0, 0, 0);
+            // count++;
           }
-        }
         // ray = view->createViewingRay(sample);  // convert the 2d sample position to a 3d ray
         // ray.transform(viewToWorld);            // transform this to world space
         // c += traceRay(ray, 0, 0, 0);
       }
-      frame->setColor(sample, c / (double)rpp);
+          frame->setColor(sample, c / (double)count);
+    }
+    else{
+      // std::cout << xi << " " << yi << std::endl;
         // c = RGB(0, 0, 0);
-        // view->getSample(xi, yi, 0, sample);
-        // Vec3 sp = view->getSamplePosition(sample);
-        // std::vector<Light *>::const_iterator li = world -> lightsBegin();
-        // bool isPoint = false;
-        // while(li != world -> lightsEnd())
-        // {
-        //   Ray r = (*li) -> getLightRay(sp, isPoint);
-        //   if (isPoint)
-        //   {
-        //     Vec3 pos;
-        //     c = reverseTraceRay(r,0,0,0,pos);
-        //     if(pos.z() < -3){
-        //     std::cout << "pos " << pos << endl;           
-        //     if(pos != Vec3(0,0,0)){
-        //     view->createSample(pos, sample);
-        //     frame->setColor(sample, c);
-        //   }
-        //   }
-        //   }
-        //   li++;
-        // }
 
-      // for (int ri = 0; ri < rpp; ++ri)
-      // {
+      for (int ri = 0; ri < rpp; ++ri)
+      {
 
-      //   view->getSample(xi, yi, ri, sample);
-      //   ray = view->createViewingRay(sample);  // convert the 2d sample position to a 3d ray
-      //   ray.transform(viewToWorld);            // transform this to world space
-      //   c += traceRay(ray, 0, 0, 0);
-      // }
+        view->getSample(xi, yi, ri, sample);
+        ray = view->createViewingRay(sample);  // convert the 2d sample position to a 3d ray
+        ray.transform(viewToWorld);            // transform this to world space
+        c += traceRay(ray, 0, 0, 0);
+      }
+          frame->setColor(sample, c / (double)rpp);
 
     }
   }
+}
 }
 
 // This traverses the loaded scene file and builds a list of primitives, lights and the view object. See World.hpp.
@@ -501,14 +467,16 @@ importSceneToWorld(SceneInstance * inst, Mat4 localToWorld, int time)
 int
 main(int argc, char ** argv)
 {
-  if (argc < 3)
+  if (argc < 4)
   {
     std::cout << "Usage: " << argv[0] << " scene.scd output.png [max_trace_depth]" << std::endl;
     return -1;
   }
 
-  if (argc >= 4)
-    max_trace_depth = atoi(argv[3]);
+  if (argc >= 5)
+    max_trace_depth = atoi(argv[4]);
+
+  int focus = atoi(argv[3]);
 
   cout << "Max trace depth = " << max_trace_depth << endl;
 
@@ -524,7 +492,7 @@ main(int argc, char ** argv)
   frame = new Frame(IMAGE_WIDTH, IMAGE_HEIGHT);
 
   // Render the world
-  renderWithRaytracing();
+  renderWithRaytracing(focus);
 
   // Save the output to an image file
   frame->save(argv[2]);

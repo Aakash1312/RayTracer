@@ -20,6 +20,68 @@ Primitive::~Primitive()
 {
 }
 
+// bool
+// Cylinder::intersect(Ray &ray, bool &inside) const
+// {
+//   Vec3 top = Vec3(modelToWorld_ * Vec4(topo, 1.0));
+//   Vec3 bottom = Vec3(modelToWorld_ * Vec4(bottomo, 1.0));
+//   inside = false;
+//   Vec3 normal = (bottom - top).normalize();
+//   Vec3 nray = ((ray.direction())*normal)*normal;
+//   Vec3 xyray = (ray.direction() - nray);
+//   double ratio = nray.length() / xyray.length();
+//   Vec3 xyrayn = xyray.normalize();
+//   Vec3 center = top - (((ray.start() - top)*normal)*normal);
+//   Vec3 U = center - ray.start();
+//   double m = U*(ray.direction());
+//   if (U*U < r_*r_)
+//   {
+//     inside = true;
+//   }
+
+//   if ((U*U - m*m) > r_*r_)
+//   {
+//     return false;
+//   }
+//   else
+//   {
+//     double offset = sqrt(r_*r_ + m*m - U*U);
+//     double depth;
+//     double gap;
+//     if (inside)
+//     {
+//       gap = (m + offset);
+//     }
+//     else{
+//     gap = (m - offset);
+//   }
+//       depth = gap*ratio;
+
+//     Vec3 dposition = depth*normal + ray.start();
+//     if (((position-bottom).length() < (top-bottom).length()) && ((position-bottom)*(top-bottom)) > 0 )
+//     {
+//       ray.setMinT(sqrt(depth*depth + gap*gap));
+//       return true;
+//     }
+//     else
+//     {
+//       return false;
+//     }
+//     }
+// }
+
+// Vec3 Cylinder::calculateNormal(Vec3 const & position) const
+// {
+//   Vec3 top = Vec3(modelToWorld_ * Vec4(topo, 1.0));
+//   Vec3 bottom = Vec3(modelToWorld_ * Vec4(bottomo, 1.0));
+//   Vec3 normal = (bottom-top).normalize();
+//   Vec3 temp = position - top;
+//   double dist = temp*normal;
+//   Vec3 c = top + dist*normal;
+//   Vec3 n = (position - c).normalize();
+//   return n;
+// }
+
 Sphere::Sphere(double radius, RGB const & c, Material const & m, Mat4 const & modelToWorld): Primitive(c, m, modelToWorld)
 {
   r_ = radius;

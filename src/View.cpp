@@ -62,6 +62,8 @@ View::createViewingRay2(Sample const & s, int x, int y, double d) const
 {
   Vec3 p = getSamplePosition(s);
   Vec3 dest = Vec3(x,y,LL_.z()-d);
+  // std::cout <<"p "<< p << std::endl;
+  // std::cout <<"d "<< dest << std::endl;
   return Ray::fromOriginAndDirection(p,(dest-p).normalize());
 }
 
