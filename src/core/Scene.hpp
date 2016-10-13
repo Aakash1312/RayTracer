@@ -5,6 +5,7 @@
  *      Author: jima
  *      Modified: sidch
  */
+#define _GLIBCXX_USE_CXX11_ABI 0
 
 #ifndef __Scene_hpp__
 #define __Scene_hpp__

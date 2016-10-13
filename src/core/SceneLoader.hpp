@@ -5,6 +5,7 @@
  *      Author: jima
  *      Modified: sidch
  */
+#define _GLIBCXX_USE_CXX11_ABI 0
 
 #ifndef __SceneLoader_hpp__
 #define __SceneLoader_hpp__
@@ -58,6 +59,7 @@ class SceneLoader
     bool getName(std::istream & str, std::string type, std::string & name); // gets a variable name from a command
     void setLightDefaults(SceneGroup * n);
     void setSphereDefaults(SceneGroup * n);
+    void setCylinderDefaults(SceneGroup * n);
     void setLensDefaults(SceneGroup * n);
     void setCameraDefaults(SceneGroup * n);
     void setMaterialDefaults(ParametricMaterial * n);
@@ -70,6 +72,7 @@ class SceneLoader
     bool doCamera(std::istream & str, std::string & name); // process a Camera command
     bool doLight(std::istream & str, std::string & name); // process a Light command
     bool doSphere(std::istream & str, std::string & name); // process a Sphere command
+    bool doCylinder(std::istream & str, std::string & name); // process a Sphere command
     bool doLens(std::istream & str, std::string & name); // process a Sphere command
     bool doMaterial(std::istream & str, std::string & name); // process a Material command
 

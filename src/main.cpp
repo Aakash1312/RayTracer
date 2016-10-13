@@ -34,6 +34,7 @@ getShadedColor(Primitive const & primitive, Vec3 const & pos, Ray const & ray)
   {
     return RGB(0,0,0);
   }
+
   //   if (m.getMT() == 2 && m.getMR() == 0)
   // {
   //   return RGB(20,20,20);
@@ -117,8 +118,8 @@ traceRay(Ray & ray, int depth, int presentMaterial, int of)
   std::vector<Primitive *>::const_iterator j;
   double min = 100000000000;
   bool intersected = false;
-  bool tmpinside;
-  bool inside;
+  bool tmpinside = false;
+  bool inside = false;
   while(i != world->primitivesEnd())
   {
     if((*i)->intersect(ray, tmpinside))
@@ -146,15 +147,10 @@ traceRay(Ray & ray, int depth, int presentMaterial, int of)
       Vec3 rfd;
       Vec3 ur;
       Ray rf;
-      if (of)
-      {
-        of = 0;
-      }
       if (inside)
       {
         n2 = 1/n2;
         presentMaterial = 0;
-        of = 1;
         nr = -1*nr;
         ur = ray.direction();
         double ct1 = -1*(ur*nr);
@@ -162,14 +158,9 @@ traceRay(Ray & ray, int depth, int presentMaterial, int of)
         rfd = ur/n2 + ((ct1/n2)-sqrt(1-ss2))*nr;
         rfd = rfd/rfd.length();
         rf = Ray::fromOriginAndDirection(pos+0.001*rfd,rfd);
-        std::vector<Light *>::const_iterator li = world->lightsBegin();
       }
       else
       {
-        if (m.getMT() != 0)
-        {
-          presentMaterial = 1;
-        }
       ur = ray.direction();
       double ct1 = -1*(ur*nr);
       double ss2 = (1-(ct1*ct1))/(n2*n2);
@@ -428,12 +419,20 @@ importSceneToWorld(SceneInstance * inst, Mat4 localToWorld, int time)
 
   double r;
   MaterialInfo m;
-
+  Vec3 top;
+  Vec3 bot;
   if (g->computeSphere(r, m, time))
   {
     Material mat(m.k[0], m.k[1], m.k[2], m.k[3], m.k[4], m.k[MAT_MS], m.k[5], m.k[6]);
     Sphere * sph = new Sphere(r, m.color, mat, localToWorld);
     world->addPrimitive(sph);
+  }
+
+  if (g->computeCylinder(r, top, bot, m, time))
+  {
+    Material mat(m.k[0], m.k[1], m.k[2], m.k[3], m.k[4], m.k[MAT_MS], m.k[5], m.k[6]);
+    Cylinder * cyl = new Cylinder(r, top, bot, m.color, mat, localToWorld);
+    world->addPrimitive(cyl);
   }
 
   double w;

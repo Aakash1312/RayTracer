@@ -8,6 +8,7 @@
  *      Author: jima
  *      Modified: sidch
  */
+#define _GLIBCXX_USE_CXX11_ABI 0
 
 #ifndef __SceneData_hpp__
 #define __SceneData_hpp__
@@ -334,7 +335,42 @@ class ParametricLens
       delete width_;
     }
 };
+class ParametricCylinder
+{
+  private:
+    ParametricValue * radius_;
+    ParametricMaterial * material_;
+    Vec3* top_;
+    Vec3* bottom_;
+    friend class SceneLoader;
 
+  public:
+    double getRadius(int time)
+    {
+      return radius_->getValue(time);
+    }
+    Vec3 getTop()
+    {
+      return *top_;
+    }
+    Vec3 getBottom()
+    {
+      return *bottom_;
+    }
+    MaterialInfo getMaterial(int time)
+    {
+      return material_->getMaterial(time);
+    }
+
+    ParametricCylinder() : radius_(NULL), top_(NULL), bottom_(NULL), material_(NULL) {}
+
+    ~ParametricCylinder()
+    {
+      delete radius_;
+      delete top_;
+      delete bottom_;
+    }
+};
 /** A time-varying camera. */
 class ParametricCamera
 {

@@ -5,6 +5,7 @@
  *      Author: jima
  *      Modified: sidch
  */
+#define _GLIBCXX_USE_CXX11_ABI 0
 
 #ifndef __SceneGroup_hpp__
 #define __SceneGroup_hpp__
@@ -23,6 +24,7 @@ class SceneGroup
     bool computeMesh(TriangleMesh *& mesh, MaterialInfo & material, int time); /* get a mesh */
     bool computeSphere(double & radius, MaterialInfo & material, int time); /* get a sphere */
     bool computeLens(double & radius, double & width, MaterialInfo & material, int time); /* get a sphere */
+    bool computeCylinder(double & radius, Vec3 &top, Vec3 &bottom, MaterialInfo & material, int time); /* get a sphere */
     bool computeLight(LightInfo & ld, int time = 0); /* get light parameters */
     bool computeCamera(CameraInfo & frustum, int time = 0); /* get camera frustum */
 
@@ -42,6 +44,7 @@ class SceneGroup
     std::vector<SceneInstance *> children_;
     ParametricSphere * sphere_;
     ParametricLens * lens_;
+    ParametricCylinder * cylinder_;
     ParametricLight * light_;
     ParametricCamera * camera_;
     TriangleMesh * mesh_;

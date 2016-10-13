@@ -20,67 +20,164 @@ Primitive::~Primitive()
 {
 }
 
-// bool
-// Cylinder::intersect(Ray &ray, bool &inside) const
-// {
-//   Vec3 top = Vec3(modelToWorld_ * Vec4(topo, 1.0));
-//   Vec3 bottom = Vec3(modelToWorld_ * Vec4(bottomo, 1.0));
-//   inside = false;
-//   Vec3 normal = (bottom - top).normalize();
-//   Vec3 nray = ((ray.direction())*normal)*normal;
-//   Vec3 xyray = (ray.direction() - nray);
-//   double ratio = nray.length() / xyray.length();
-//   Vec3 xyrayn = xyray.normalize();
-//   Vec3 center = top - (((ray.start() - top)*normal)*normal);
-//   Vec3 U = center - ray.start();
-//   double m = U*(ray.direction());
-//   if (U*U < r_*r_)
-//   {
-//     inside = true;
-//   }
+Cylinder::Cylinder(double radius, Vec3 top, Vec3 bottom, RGB const & c, Material const & m, Mat4 const & modelToWorld): Primitive(c, m, modelToWorld)
+{
+  r_ = radius;
+  top_ = top;
+  bottom_ = bottom;
+}
 
-//   if ((U*U - m*m) > r_*r_)
-//   {
-//     return false;
-//   }
-//   else
-//   {
-//     double offset = sqrt(r_*r_ + m*m - U*U);
-//     double depth;
-//     double gap;
-//     if (inside)
-//     {
-//       gap = (m + offset);
-//     }
-//     else{
-//     gap = (m - offset);
-//   }
-//       depth = gap*ratio;
+bool
+Cylinder::intersect(Ray &ray, bool &inside) const
+{
+  bool inside2 = false;
+  Vec3 top = Vec3(modelToWorld_ * Vec4(top_, 1.0));
+  Vec3 bottom = Vec3(modelToWorld_ * Vec4(bottom_, 1.0));
+  inside = false;
+  Vec3 normal = (bottom - top).normalize();  
+  Vec3 nray = ((ray.direction())*normal)*normal;
+  Vec3 xyray = (ray.direction() - nray);
+  double ratio;
+  if ((ray.direction())*normal)
+  {
+    if(((ray.direction())*normal) > 0)
+    {
+      ratio = nray.length() / xyray.length();
+    }
+  else
+  {
+    ratio = -1 * nray.length() / xyray.length();
+  }
+  }
+  else
+  {
+    ratio = 0;
+  }
 
-//     Vec3 dposition = depth*normal + ray.start();
-//     if (((position-bottom).length() < (top-bottom).length()) && ((position-bottom)*(top-bottom)) > 0 )
-//     {
-//       ray.setMinT(sqrt(depth*depth + gap*gap));
-//       return true;
-//     }
-//     else
-//     {
-//       return false;
-//     }
-//     }
-// }
 
-// Vec3 Cylinder::calculateNormal(Vec3 const & position) const
-// {
-//   Vec3 top = Vec3(modelToWorld_ * Vec4(topo, 1.0));
-//   Vec3 bottom = Vec3(modelToWorld_ * Vec4(bottomo, 1.0));
-//   Vec3 normal = (bottom-top).normalize();
-//   Vec3 temp = position - top;
-//   double dist = temp*normal;
-//   Vec3 c = top + dist*normal;
-//   Vec3 n = (position - c).normalize();
-//   return n;
-// }
+  Vec3 xyrayn = xyray.normalize();
+  Vec3 center = top + (((ray.start() - top)*normal)*normal);
+  Vec3 U = center - ray.start();
+  double m = U*(xyrayn);
+  if (U*U <= r_*r_)
+  {
+    inside2 = true;
+    if ((((ray.start() - top)*normal) > 0) && (((ray.start() - top)*normal) < ((bottom-top).length())))
+    {
+      inside = true;
+    }
+  }
+  if (m < 0 && (!inside))
+  {
+    return false;
+  }
+
+  Vec3 ndisv = ((top - ray.start())*normal)*normal;
+  if (ndisv*normal > 0 && ((ray.direction())*normal) > 0)
+  {
+    double t = ndisv.length()/((ray.direction())*normal);
+    Vec3 pos = ray.start() + t*(ray.direction());
+    if ((pos - top).length() < r_)
+    {
+      ray.setMinT(1 *t);
+      return true;
+    }
+  }
+  if (((ray.direction())*normal) < 0 && (inside))
+  {
+
+    double t = ndisv.length()/((ray.direction())*normal);
+    Vec3 pos = ray.start() - t*(ray.direction());
+    if ((pos - top).length() < r_)
+    {
+      ray.setMinT(-1*t);
+      return true;
+    }
+  }
+  Vec3 ndish = ((bottom - ray.start())*normal)*normal;
+  if (ndish*normal < 0 && ((ray.direction())*normal) < 0)
+  {
+
+    double t = ndish.length()/((ray.direction())*normal);
+    Vec3 pos = ray.start() - t*(ray.direction());
+    if ((pos - bottom).length() < r_)
+    {
+      ray.setMinT(-1*t);
+      return true;
+    }
+  }
+
+  if (((ray.direction())*normal) > 0  && (inside))
+  {
+
+    double t = ndish.length()/((ray.direction())*normal);
+    Vec3 pos = ray.start() + t*(ray.direction());
+    if ((pos - bottom).length() < r_)
+    {
+      ray.setMinT(1*t);
+      return true;
+    }
+  }
+
+  if ((U*U - m*m) > r_*r_)
+  {
+    return false;
+  }
+  else
+  {
+    double offset = sqrt(r_*r_ + m*m - U*U);
+    double depth;
+    double gap;
+    if (inside2)
+    {
+      gap = (m + offset);
+    }
+    else
+    {
+      gap = m - offset;
+    }
+    depth = gap*ratio;
+
+    Vec3 dposition = depth*normal + top-(((top-(ray.start()))*normal)*normal);
+    if (((dposition-bottom).length() < (top-bottom).length()) && ((dposition-bottom)*(top-bottom)) > 0 )
+    {
+      ray.setMinT(sqrt(depth*depth + gap*gap));
+      return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
+}
+
+Vec3 Cylinder::calculateNormal(Vec3 const & position) const
+{
+  Vec3 top = Vec3(modelToWorld_ * Vec4(top_, 1.0));
+  Vec3 bottom = Vec3(modelToWorld_ * Vec4(bottom_, 1.0));
+  Vec3 normal = (bottom-top).normalize();
+  if ((((position - top).length()) < r_)) 
+  {
+    return -1 * normal;
+  }
+  if ((((position - bottom).length()) < r_)) 
+  {
+    return normal;
+  }
+  // if ((((position - top)* normal) < 0.001) && (((position - top)* normal) > -0.001))
+  // {
+  //   return -1 * normal;
+  // }
+  // if ((((position - bottom)* normal) < 0.001) && (((position - bottom)* normal) > -0.001))
+  // {
+  //   return normal;
+  // }
+  Vec3 temp = position - top;
+  double dist = temp*normal;
+  Vec3 c = top + dist*normal;
+  Vec3 n = (position - c).normalize();
+  return n;
+}
 
 Sphere::Sphere(double radius, RGB const & c, Material const & m, Mat4 const & modelToWorld): Primitive(c, m, modelToWorld)
 {
