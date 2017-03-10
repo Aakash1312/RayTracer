@@ -1,3 +1,5 @@
+#define _GLIBCXX_USE_CXX11_ABI 0
+
 #include "SceneLoader.hpp"
 #include "Algebra3.hpp"
 #include <fstream>
@@ -692,6 +694,31 @@ void SceneLoader::setLensDefaults(SceneGroup * n)
 
 }
 
+void SceneLoader::setCylinderDefaults(SceneGroup * n)
+{
+  if (n->cylinder_->material_ == NULL)
+  {
+    n->cylinder_->material_ = new ParametricMaterial();
+    setMaterialDefaults(n->cylinder_->material_);
+  }
+
+  if (n->cylinder_->radius_ == NULL)
+  {
+    n->cylinder_->radius_ = new ConstValue(1);
+  }
+
+  if (n->cylinder_->top_ == NULL)
+  {
+    n->cylinder_->top_ = new Vec3(1,1,1);
+  }
+
+  if (n->cylinder_->bottom_ == NULL)
+  {
+    n->cylinder_->bottom_ = new Vec3(0,0,0);
+  }
+
+}
+
 // no obj includes in as5; they come back in as6
 bool SceneLoader::doInclude(istream & str, string & name)
 {
@@ -841,6 +868,109 @@ bool SceneLoader::doSphere(istream & str, string & name)
   }
   while (true);
 }
+
+bool SceneLoader::doCylinder(istream & str, string & name)
+{
+  if (!getName(str, "cylinder", name))
+    return false;
+
+  SceneGroup * n = new SceneGroup();
+  groups[name] = n;
+  n->name_ = name;
+  n->cylinder_ = new ParametricCylinder();
+
+  do
+  {
+    int state = findOpenOrClosedParen(str);
+
+    if (state == ERROR)
+    {
+      setCylinderDefaults(n);
+      return false;
+    }
+    else if (state == CLOSED)
+    {
+      setCylinderDefaults(n);
+      return true;
+    }
+    else if (state == OPEN)
+    {
+      string cmd;
+      vector<ParametricValue *> values;
+
+      if (readCommand(str, cmd))
+      {
+        if (cmd == "radius")
+        {
+          if (getValues(str, values) < 1)
+          {
+            *err << "Type with no parameters at ";
+            errLine(str.tellg());
+          }
+          else
+          {
+            cleanAfter(values, 1);
+            n->cylinder_->radius_ = values[0];
+          }
+        }
+        else if (cmd == "material")
+        {
+          string matName = getString(str);
+
+          if (matName.empty())
+          {
+            *err << "No material name after material command at ";
+            errLine(str.tellg());
+          }
+          else if (materials[matName] == NULL)
+          {
+            *err << "Unknown material " << matName << " referenced at ";
+            errLine(str.tellg());
+          }
+          else
+          {
+            n->cylinder_->material_ = materials[matName];
+          }
+        }
+        else if (cmd == "top")
+        {
+          if (getValues(str, values) < 3)
+          {
+            *err << "Type with no parameters at ";
+            errLine(str.tellg());
+          }
+          else
+          {
+            cleanAfter(values, 3);
+            n->cylinder_->top_ = new Vec3(values[0]->getValue(), values[1]->getValue(), values[2]->getValue());
+          }
+        }
+        else if (cmd == "bottom")
+        {
+          if (getValues(str, values) < 3)
+          {
+            *err << "Type with no parameters at ";
+            errLine(str.tellg());
+          }
+          else
+          {
+            cleanAfter(values, 3);
+            n->cylinder_->bottom_ = new Vec3(values[0]->getValue(), values[1]->getValue(), values[2]->getValue());
+          }
+        }
+        else
+        {
+          *err << "Error: command " << cmd << " not recognized at ";
+          errLine(str.tellg());
+        }
+
+        findCloseParen(str);
+      }
+    }
+  }
+  while (true);
+}
+
 
 bool SceneLoader::doLens(istream & str, string & name)
 {
@@ -1293,6 +1423,20 @@ bool SceneLoader::buildScene(string filename)
         else
         {
           *err << "mangled sphere command at ";
+          errLine(file.tellg());
+        }
+      }
+      else if (line == "Cylinder")
+      {
+        string gname;
+
+        if (doCylinder(file, gname))
+        {
+          cout << "read cylinder " << gname << endl;
+        }
+        else
+        {
+          *err << "mangled cylinder command at ";
           errLine(file.tellg());
         }
       }

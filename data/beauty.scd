@@ -9,18 +9,17 @@
 	(ma 0.5 ) (ml 0.6 ) (ms 0.1 ) (msp 150 ) (msm 1 ) (mt 0 ) (mtn 1 ))
 (Material matWHITE
 	(color 0.75 0.75 0.75 )
-	(ma 0.5 ) (ml 0.6 ) (ms 0.1 ) (msp 40 ) (msm 1 ) (mt 0 ) (mtn 1 ))
+	(ma 0.5 ) (ml 0.6 ) (ms 0.1 ) (msp 20 ) (msm 1 ) (mt 0 ) (mtn 1 ))
 (Material matGlass
-	(color 0.75 0.75 0.75 )
-	(ma 0.0 ) (ml 0.2 ) (ms 0.12 ) (msp 40 ) (msm 1 ) (mt 1 ) (mtn 1.12 ))
-(Material matLens
 	(color 1 1 1 )
-	(ma 0.0 ) (ml 0.2 ) (ms 0.0 ) (msp 40 ) (msm 1 ) (mt 1 ) (mtn 1.8 ))
+	(ma 0.2 ) (ml 0.2 ) (ms 0.1 ) (msp 2 ) (msm 1 ) (mt 1.0 ) (mtn 1.0))
 (Material matAir
-	(color 1.0 1.0 1.0 )
-	(ma 1.0 ) (ml 1.0 ) (ms 0.00 ) (msp 0.0 ) (msm 0.0 ) (mt 1 ) (mtn 1.0 ))
+	(color 1 1 1 )
+	(ma 0.6 ) (ml 0.6 ) (ms 0 ) (msp 0 ) (msm 0 ) (mt 1 ) (mtn 1.0))
 (Light amb (type 0 ) (color 0.2 0.2 0.2 ) )
-(Light pt1 (type 2 ) (color 20.8 20.8 20.8 )  (falloff 1 )  (deaddistance 0.1 ) )
+(Light pt1 (type 2 ) (color 8.8 8.8 15.8 )  (falloff 1 )  (deaddistance 1 ) )
+(Light pt2 (type 2 ) (color 15.8 8.8 8.8 )  (falloff 1 )  (deaddistance 1 ) )
+(Light pt3 (type 2 ) (color 8.8 15.8 8.8 )  (falloff 1 )  (deaddistance 1 ) )
 (Camera cam
 	(perspective 1 )
 	(l -1 ) (r 1 ) (b -1 ) (t 1 ) (n 3 )) #no far plane
@@ -28,8 +27,8 @@
 (Sphere spWALL (radius 100000.0 ) (material matWHITE ))
 (Sphere spLEFT (radius 100000.0 ) (material matBLUE ))
 (Sphere spRIGHT (radius 100000.0 ) (material matRED ))
-(Sphere spGlass (radius 2 ) (material matGlass ))
-(Lens spGlass2 (radius 10 ) (width 1 ) (material matLens ))
+(Sphere spGlass (radius 1 ) (material matGlass ))
+(Sphere spGlass2 (radius 3.99 ) (material matAir ))
 (Material helixMat0
 	(color 0.0 1.0 0.335001069639 )
 	(ma 0.4 ) (ml 0.8 ) (ms 0.5 ) (msp 50 ) (msm 0.5 ) (mt 0 ) (mtn 1 ))
@@ -49,10 +48,12 @@
 		0 0 0.5 0
 		0 0 0 0 ) )
 	(I amb1 amb )
-	(I pt1_I pt1 (T 2 2 -45 ) )
-	(I s_0 sp_0 (T 0.0 3.0 -40 ) )
-	(I spGlass_II spGlass2 (T 2 3 -25.0 ) )
-	(I spGlass_II spGlass2 (T -2 0 -30.0 ) )
+	(I pt1_I pt1 (T 3 -8 -35 ) )
+	(I pt2_I pt2 (T 0 -8 -40 ) )
+	(I pt3_I pt3 (T -3 -8 -35 ) )
+	(I spGlass_I spGlass (T 3 -8 -35 ) )
+	(I spGlass_I spGlass (T 0 -8 -40 ) )
+	(I spGlass_I spGlass (T -3 -8 -35 ) )
 	(I spB_I spWALL (T 0 -100009.0 -3 ) )
 	(I spT_I spTOP (T 0 100009.0 -3 ) )
 	(I spF_I spWALL (T 0 0 -100100.0 ) )

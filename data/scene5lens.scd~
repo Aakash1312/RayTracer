@@ -17,12 +17,12 @@
 (Light pt1 (type 2 ) (color 20.8 20.8 20.8 )  (falloff 1 )  (deaddistance 0.1 ) )
 (Camera cam
 	(perspective 1 )
-	(l -1 ) (r 1 ) (b -1 ) (t 1 ) (n 3 )) #no far plane
+	(l -1 ) (r 1 ) (b -1 ) (t 1 ) (n -20 )) #no far plane
 (Sphere spWALL (radius 100000.0 ) (material matWHITE ))
 (Sphere spLEFT (radius 100000.0 ) (material matBLUE ))
 (Sphere spRIGHT (radius 100000.0 ) (material matRED ))
 (Sphere spGlass (radius 4 ) (material matGlass ))
-(Lens spGlass2 (radius 5 ) (width 2 ) (material matLens ))
+(Lens spGlass2 (radius 60 ) (width 0.02 ) (material matLens ))
 (Material helixMat0
 	(color 0.0 1.0 0.335001069639 )
 	(ma 0.4 ) (ml 0.8 ) (ms 0.5 ) (msp 50 ) (msm 0.5 ) (mt 0 ) (mtn 1 ))
@@ -236,7 +236,7 @@
 	(I spF_I spWALL (T 0 0 -100100.0 ) )
 	(I spN_I spWALL (T 0 0 100000.0 ) )
 	(I spL_I spLEFT (T -100009.0 0 -3 ) )
-	(I spGlass_II spGlass2 (T 0 0 -20.0 ) )
+	(I spGlass_II spGlass2 (T 0 0 -10.0 ) )
 	(I spR_I spRIGHT (T 100009.0 0 -3 ) )
 )
 (Render awesome )

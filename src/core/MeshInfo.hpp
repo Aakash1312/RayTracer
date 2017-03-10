@@ -7,6 +7,7 @@
  *      Author: jima
  *      Modified: sidch
  */
+#define _GLIBCXX_USE_CXX11_ABI 0
 
 #ifndef __MeshInfo_hpp__
 #define __MeshInfo_hpp__

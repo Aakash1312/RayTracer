@@ -5,6 +5,7 @@
  *      Author: jima
  *      Modified: sidch
  */
+#define _GLIBCXX_USE_CXX11_ABI 0
 
 #include "SceneInstance.hpp"
 #include "SceneGroup.hpp"
@@ -14,6 +15,7 @@ SceneGroup::SceneGroup()
   name_ = "unassigned";
   sphere_ = NULL;
   lens_ = NULL;
+  cylinder_ = NULL;
   light_ = NULL;
   camera_ = NULL;
   meshMaterial_ = NULL;
@@ -29,6 +31,7 @@ SceneGroup::~SceneGroup()
   delete camera_;
   delete mesh_;
   delete lens_;
+  delete cylinder_;
 }
 
 int
@@ -80,6 +83,19 @@ SceneGroup::computeLens(double & radius,double &width, MaterialInfo & material, 
   radius = lens_->getRadius(time);
   width = lens_->getWidth(time);
   material = lens_->getMaterial(time);
+  return true;
+}
+
+bool
+SceneGroup::computeCylinder(double & radius, Vec3 &top, Vec3 &bottom, MaterialInfo & material, int time)  /* get a sphere */
+{
+  if (cylinder_ == NULL)
+    return false;
+
+  radius = cylinder_->getRadius(time);
+  top = cylinder_->getTop();
+  bottom = cylinder_->getBottom();
+  material = cylinder_->getMaterial(time);
   return true;
 }
 

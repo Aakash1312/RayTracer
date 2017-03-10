@@ -75,6 +75,21 @@ class Sphere : public Primitive
     double r_;
 };
 
+class Cylinder : public Primitive
+{
+  public:
+    /** Constructor. */
+    Cylinder(double radius, Vec3 top, Vec3 bottom, RGB const & c, Material const & m, Mat4 const & modelToWorld);
+
+    bool intersect(Ray & ray, bool &inside) const;
+    Vec3 calculateNormal(Vec3 const & position) const;
+
+  private:
+    double r_;
+    Vec3 top_;
+    Vec3 bottom_;
+};
+
 class Lens : public Primitive
 {
   public:
